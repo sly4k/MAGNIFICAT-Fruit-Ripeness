@@ -2,7 +2,7 @@
 
 # 🍎 Fruit Ripeness Detection & Classification (Google Colab Pipeline)
 
-A complete deep learning pipeline designed to execute inside Google Colab. This project solves the complex challenge of merging multiple independent fruit datasets exported from Roboflow to train both Object Detection (YOLOv8) and lightweight Image Classification (MobileNetV2) models.
+A complete deep learning pipeline designed to execute inside Google Colab. This project merges multiple independent fruit datasets exported from Roboflow to train both Object Detection (YOLOv8) and lightweight Image Classification (MobileNetV2) models.
 
 ## 📌 Project Overview
 
@@ -12,18 +12,18 @@ A complete deep learning pipeline designed to execute inside Google Colab. This 
 
 ### Supported Architectures
 * **YOLOv8s:** Primary object detection model. Responsible for identifying fruit locations (bounding boxes) and initial classification.
-* **MobileNetV2 (α=0.5 & α=1.0):** Secondary classification models optimized for edge hardware. Evaluates isolated fruit crops to provide high-speed ripeness validation. Includes TensorFlow Lite (`.tflite`) conversion.
+* **MobileNetV2 (α=0.5 & α=1.0):** Secondary classification models optimized for edge hardware. Evaluates isolated fruit crops to provide high-speed ripeness validation. 
 
 ---
 
-## 📦 Model Weights (Download Links)
+## 📦 Model Weights & Assets
 
-Due to GitHub file size limits, the trained heavy `.keras` weights are hosted externally on Google Drive.
-
-* [Download MobileNetV2 Alpha 0.5 (.keras)](INSERT_YOUR_ALPHA_05_GOOGLE_DRIVE_LINK_HERE)
-* [Download MobileNetV2 Alpha 1.0 (.keras)](INSERT_YOUR_ALPHA_10_GOOGLE_DRIVE_LINK_HERE)
-
-*(Note: The optimized, deployment-ready `.tflite` edge models and the trained YOLOv8s weights are included directly in this repository).*
+All trained weights and deployment models are included directly in this repository:
+* `fruit_ripeness_best.pt` (Trained YOLOv8s weights)
+* `mobilenetv2_alpha05_fruit_ripeness.keras` (MobileNetV2 α=0.5 standard production weights)
+* `mobilenetv2_alpha10_fruit_ripeness.keras` (MobileNetV2 α=1.0 standard production weights)
+* `mobilenetv2_alpha05_fruit_ripeness.tflite` (Optimized edge model for Alpha 0.5)
+* `mobilenetv2_alpha10_fruit_ripeness.tflite` (Optimized edge model for Alpha 1.0)
 
 ---
 
