@@ -1,50 +1,66 @@
 **Developed by Group MAGNIFICAT**
 
-# 🍎 YOLOv8 Fruit Ripeness Detection (Google Colab Version)
+# 🍎 Fruit Ripeness Detection & Classification (Google Colab Pipeline)
 
-A complete, cell-by-cell deep learning pipeline designed to execute inside Google Colab. This project detects and classifies fruits and their specific ripeness stages using **YOLOv8s** via Transfer Learning.
+A complete deep learning pipeline designed to execute inside Google Colab. This project solves the complex challenge of merging multiple independent fruit datasets exported from Roboflow to train both Object Detection (YOLOv8) and lightweight Image Classification (MobileNetV2) models.
 
 ## 📌 Project Overview
-This project solves the complex challenge of merging multiple independent fruit datasets exported from Roboflow into a single, unified deep learning pipeline. 
 
 **Supported Fruits (5):** Avocado, Guava, Mango, Pineapple, Banana  
 **Ripeness Stages (3):** Unripe, Ripe, Overripe  
 **Total Classes:** 15  
-**Architecture:** YOLOv8s (Ultralytics)
+
+### Supported Architectures
+* **YOLOv8s:** Primary object detection model. Responsible for identifying fruit locations (bounding boxes) and initial classification.
+* **MobileNetV2 (α=0.5 & α=1.0):** Secondary classification models optimized for edge hardware. Evaluates isolated fruit crops to provide high-speed ripeness validation. Includes TensorFlow Lite (`.tflite`) conversion.
 
 ---
 
-## 🚀 How to Run (Cell by Cell Workflow)
+## 🚀 How to Run (YOLOv8s Workflow)
 
-The codebase is structured to be run sequentially in Google Colab. Below is the exact breakdown of what each cell accomplishes.
+The `Fruit_Ripeness_Pipeline.ipynb` is structured to run sequentially.
 
 ### Part 1: Setup, Data Preprocessing & Training
-*This phase handles the automated extraction, cleaning, mapping, and training.*
-
 * **[CELL 1] — Setup & Dependencies:** Installs `ultralytics` and necessary plotting/vision libraries.
-* **[CELL 2] — Configuration & Mapping:** Defines the core 15-class Global Mapping system to ensure consistency across all fruit datasets.
-* **[CELL 3] — Storage Mounting:** Mounts Google Drive, sets file paths, and runs a sanity check to ensure the datasets actually exist.
-* **[CELL 4] — Automated Dataset Integration:** 
-  * Extracts each fruit dataset.
-  * **Smart Mapping:** Reads internal `data.yaml` files and automatically translates overlapping local IDs (e.g., Avocado `0` and Guava `0`) into the unified Global 15-Class ID system.
-  * Filters out corrupted images and merges everything into a centralized folder.
-* **[CELL 5] — Master Configuration:** Writes the final merged `data.yaml` file required by YOLOv8.
-* **[CELL 6] — Distribution Audit:** Generates a bar chart to verify class balance and total dataset volume.
-* **[CELL 6.5] — Automated Splitting:** Takes the merged training data and strictly partitions 15% for Validation and 10% for Testing to prevent overfitting.
-* **[CELL 7] — Model Training:** Fine-tunes `yolov8s.pt` over 50 epochs utilizing built-in early stopping, cosine learning rate decay, and automatic augmentations.
+* **[CELL 2] — Configuration & Mapping:** Defines the core 15-class Global Mapping system.
+* **[CELL 3] — Storage Mounting:** Mounts Google Drive and verifies dataset paths.
+* **[CELL 4] — Automated Dataset Integration:** Extracts datasets, utilizes string-matching to fix overlapping local IDs, and merges validated data into a centralized folder.
+* **[CELL 5] — Master Configuration:** Writes the final merged `data.yaml` file required by YOLO.
+* **[CELL 6] — Distribution Audit:** Generates class balance visualizations.
+* **[CELL 6.5] — Automated Splitting:** Partitions 15% Validation and 10% Testing data.
+* **[CELL 7] — Model Training:** Fine-tunes `yolov8s.pt` utilizing built-in early stopping and automatic augmentations.
 
-### Part 2: Evaluation, Inference & Explainability
-*This phase runs after the training is complete to test the model's accuracy.*
+### Part 2: Evaluation & Inference
+* **[CELL 8] — Reload Environment:** Safety net for Colab runtime disconnects.
+* **[CELL 9] — Evaluation:** Computes final mAP50, Precision, and Recall.
+* **[CELL 10] — Confusion Matrix:** Visualizes classification errors.
+* **[CELL 11-12] — Inference:** Translates raw outputs into colored bounding boxes and generates a final visual predictions grid.
 
-* **[CELL 8] — Reload Environment:** A safety net to re-import libraries and paths in case the Colab runtime disconnects after the long training process.
-* **[CELL 9] — Evaluation on Unseen Data:** Computes the final mAP50, Precision, and Recall against the separated test data.
-* **[CELL 10] — Confusion Matrix:** Visualizes exactly which fruit types or ripeness stages the model is confusing (Major vs. Minor errors).
-* **[CELL 11] — Real-World Inference:** The core prediction function. Translates raw model outputs back into human-readable bounding boxes colored by fruit type, with confidence scores.
-* **[CELL 12] — Visual Predictions Grid:** Generates a massive grid of randomly sampled test predictions for a quick, final visual sanity check.
+---
+
+## 🚀 How to Run (MobileNetV2 Workflow)
+
+Run either `MobileNetV2_Alpha05_Pipeline.ipynb` or `MobileNetV2_Alpha10_Pipeline.ipynb`. These notebooks repurpose the YOLO bounding boxes to train a standard Keras classifier.
+
+### Part 1: Keras Dataset Formatting
+* **[CELL 1-3] — Setup:** Loads TensorFlow, Keras, and mounts storage.
+* **[CELL 4-5] — Base Integration:** Re-runs the global mapping to clean raw YOLO datasets.
+* **[CELL 6] — YOLO to Classification Conversion:** Reads YOLO bounding box coordinates, crops the exact pixel area of every fruit, resizes to `224x224`, and saves them into strict Keras class-separated folders (`clf_dataset/train/ClassName`).
+* **[CELL 7] — ImageDataGenerators:** Applies real-time data augmentation (rotation, zoom, brightness shifts).
+
+### Part 2: Two-Phase Transfer Learning
+* **[CELL 8] — Architecture:** Initializes MobileNetV2 (α=0.5 or 1.0) with frozen ImageNet weights and attaches a custom GlobalAveragePooling & Dropout classification head.
+* **[CELL 9] — Phase 1 (Head Training):** Trains only the new top layers while the base remains completely frozen.
+* **[CELL 10] — Phase 2 (Fine-Tuning):** Unfreezes the top 30 layers of the base model and trains at a significantly reduced learning rate for precision adjustment.
+
+### Part 3: Evaluation & Edge Export
+* **[CELL 11-14] — Metrics:** Plots continuous loss/accuracy curves across both training phases, prints the sklearn Classification Report, and generates dual-pane Confusion Matrices.
+* **[CELL 15] — Export:** Saves the `.keras` model and automatically compiles a highly compressed `.tflite` model for edge deployment.
+* **[CELL 16] — Visual Grid:** Runs final inference on 15 random test crops.
 
 ---
 
 ## 🛠️ Key Technical Features
-1. **Transfer Learning:** Leverages a backbone pre-trained on COCO to achieve high accuracy quickly without requiring massive datasets.
-2. **Automated Error Correction:** The Integration Cell (Cell 4) uses robust string-matching logic to fix incorrect or overlapping labels in the raw dataset files.
-3. **End-to-End Execution:** Entirely self-contained pipeline from raw `.zip` extraction to deployed visual inference.
+1. **Automated Error Correction:** The pipeline utilizes robust logic to fix incorrect `data.yaml` labels dynamically during the integration phase.
+2. **Keras Format Conversion:** Automatically bridges the gap between Object Detection datasets and Image Classification architectures by translating bounding box coordinates into physical image crops.
+3. **Edge Readiness:** Supports explicit Alpha scaling (0.5/1.0) and TensorFlow Lite optimization for low-power hardware constraints.
