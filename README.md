@@ -16,6 +16,17 @@ A complete deep learning pipeline designed to execute inside Google Colab. This 
 
 ---
 
+## 📦 Model Weights (Download Links)
+
+Due to GitHub file size limits, the trained heavy `.keras` weights are hosted externally on Google Drive.
+
+* [Download MobileNetV2 Alpha 0.5 (.keras)](INSERT_YOUR_ALPHA_05_GOOGLE_DRIVE_LINK_HERE)
+* [Download MobileNetV2 Alpha 1.0 (.keras)](INSERT_YOUR_ALPHA_10_GOOGLE_DRIVE_LINK_HERE)
+
+*(Note: The optimized, deployment-ready `.tflite` edge models and the trained YOLOv8s weights are included directly in this repository).*
+
+---
+
 ## 🚀 How to Run (YOLOv8s Workflow)
 
 The `Fruit_Ripeness_Pipeline.ipynb` is structured to run sequentially.
